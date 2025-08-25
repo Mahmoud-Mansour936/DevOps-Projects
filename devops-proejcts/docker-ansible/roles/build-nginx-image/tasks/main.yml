@@ -1,0 +1,35 @@
+---
+# tasks file for build-nginx-image
+ - name: Making dockerfile dir.
+   file:
+    path: /home/deploy/docker-nginx/
+    state: directory
+
+
+ - name: html code 
+   lineinfile: 
+    path: /home/deploy/docker-nginx/index.html
+    line: '<h1>Hello from custom Nginx!</h1>'
+    create: yes
+
+ - name: Transfer Dockerfile 
+   copy:
+    src: /home/ansible_control/devops-proejcts/docker-ansible/roles/build-nginx-image/files/Dockerfile
+    dest: /home/deploy/docker-nginx/Dockerfile
+    mode: '0644'
+
+ - name: Building Dockerfile
+   community.docker.docker_image_build:
+    name: {{nginx_image_name}}
+    path: /home/deploy/docker-nginx/
+    tag: {{nginx_image_tag}}
+    force_source: true  # to update the image after updating dockerfile 
+
+ - name: Run the container
+   community.docker.docker_container:
+    name: {{nginx_container_name}}
+    state: started
+    image: simple-nginx:v1
+    published_ports:
+     - "{{nginx_host_port}}:{{nginx_container_port}}"
+    recreate: true   # to recreate container after updating dockerfile

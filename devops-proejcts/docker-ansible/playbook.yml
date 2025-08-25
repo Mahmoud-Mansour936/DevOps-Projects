@@ -1,0 +1,10 @@
+
+- name: Play1
+  hosts: web_server
+  become: true
+
+
+
+  roles:
+   - install-docker
+   - build-nginx-image

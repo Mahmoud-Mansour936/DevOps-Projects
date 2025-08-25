@@ -1,0 +1,7 @@
+---
+# defaults file for build-nginx-image
+nginx_image_name: simple-nginx
+nginx_image_tag: v1
+nginx_container_name: simple-nginx-container
+nginx_host_port: 8080
+nginx_container_port: 80
