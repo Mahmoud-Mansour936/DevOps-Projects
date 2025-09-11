@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-deploy
+spec:
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+    spec:
+      containers:
+        - name: product
+          image: hashicorp/http-echo
+
+          args: 
+           - "-text=Product Service: connected to DB "
+          ports:
+            - containerPort: 5678

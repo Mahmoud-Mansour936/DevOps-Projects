@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-deploy
+spec:
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+        - name: order
+          image: hashicorp/http-echo
+
+
+          args: 
+           - "-text=order Service: connected to product+ DB "
+          ports:
+            - containerPort: 5678

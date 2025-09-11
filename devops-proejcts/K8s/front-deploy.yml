@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deploy
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      volumes:
+       - name: conf
+         configMap:
+          name: nginx-defaultconf
+      containers:
+        - name: frontend
+          image: nginx
+          volumeMounts:
+            - name: conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+            - name: conf
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+          ports:
+            - containerPort: 80
