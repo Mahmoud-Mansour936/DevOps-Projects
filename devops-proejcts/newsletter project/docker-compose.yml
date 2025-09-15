@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  fe:
+    image: fe-image
+    container_name: fe
+    ports:
+      - "80:80"
+    networks:
+      - fe-net
+
+  be:
+    image: be-image 
+    container_name: be
+    networks:
+      - fe-net
+      - be-net
+    ports:
+      - "5000:5000"
+  
+    environment:
+      DB_HOST: db 
+      DB_NAME: newsletter 
+      DB_USER: root 
+      DB_PASSWORD: root
+
+
+
+  db:
+    image: mysql:5.7 
+    container_name: db
+    networks:
+      - be-net
+    environment:
+      MYSQL_DATABASE: newsletter
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - vol1:/var/lib/mysql
+
+networks:
+  fe-net:
+  be-net:
+
+volumes:
+  vol1:
