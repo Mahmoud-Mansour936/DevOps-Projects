@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Newsletter Signup</title>
+</head>
+<body>
+    <h1>Signup to our Newsletter</h1>
+    <form id="signupForm">
+        <input type="email" id="email" placeholder="Enter your email" required />
+        <button type="submit">Subscribe</button>
+    </form>
+
+    <script>
+        document.getElementById("signupForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+
+            try {
+                const res = await fetch("/signup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+
+                const result = await res.json();
+                alert(result.message || result.error);
+            } catch (err) {
+                alert("Failed to fetch: " + err.message);
+            }
+        });
+    </script>
+</body>
+</html>
