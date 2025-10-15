@@ -1,0 +1,48 @@
+# FE-deployment 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fe-deployment
+  namespace: fe
+  labels:
+    app: fe
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fe
+  template:
+    metadata:
+      labels:
+        app: fe
+    spec:
+      containers:
+      - name: fe-container
+        image: nginx:latest 
+        ports:
+         - containerPort: 80  
+
+        volumeMounts:
+          - name: empty
+            mountPath: /usr/share/nginx/html
+
+
+      volumes: 
+        - name: empty
+          emptyDir:
+
+---
+# FE-NodePort
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: fe
+spec:
+  type: NodePort
+  selector:
+      app: fe
+  ports:
+    - port: 80
+      targetPort: 80  
+      nodePort: 30080 

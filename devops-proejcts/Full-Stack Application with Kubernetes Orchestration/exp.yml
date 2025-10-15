@@ -1,0 +1,63 @@
+# express-deployment 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express-deployment
+  namespace: mongo-express
+  labels:
+    app: express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: exp
+  template:
+    metadata:
+      labels:
+        app: exp
+    spec:
+      containers:
+      - name: exp-container
+        image: mongo-express:latest 
+        ports:
+          - containerPort: 8081
+
+        envFrom:
+         - configMapRef:
+              name: mongo-express-config
+
+
+---
+
+# express-ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-express-config
+  namespace: mongo-express
+data:
+  ME_CONFIG_MONGODB_SERVER: "mongodb-service.mongo-db.svc.cluster.local"
+  ME_CONFIG_MONGODB_PORT: "27017"
+  ME_CONFIG_MONGODB_ADMINUSERNAME: "admin" 
+  ME_CONFIG_MONGODB_ADMINPASSWORD: "admin123"
+  ME_CONFIG_BASICAUTH_USERNAME: "admin"
+  ME_CONFIG_BASICAUTH_PASSWORD: "admin123"
+  ME_CONFIG_MONGODB_URL: "mongodb://admin:admin123@mongodb-service.mongo-db.svc.cluster.local:27017/"
+
+
+
+---
+# express-NodePort
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express-service
+  namespace: mongo-express
+spec:
+  type: NodePort
+  selector:
+      app: exp
+  ports:
+    - port: 8081
+      targetPort: 8081  
+      nodePort: 30081

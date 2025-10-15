@@ -1,0 +1,137 @@
+# DB-deployment 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment
+  namespace: mongo-db
+  labels:
+    app: DB
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db-container
+          image: mongo:4.4
+          ports:
+            - containerPort: 27017
+
+          envFrom:
+          - secretRef:
+              name: db-secret
+          
+          volumeMounts:
+            - name: pvc-vol
+              mountPath: /data/db
+
+      tolerations:
+        - key: "key"
+          operator: "Equal"
+          value: "db"
+          effect: "NoSchedule"
+
+      nodeName: task
+
+      volumes:
+        - name: pvc-vol
+          persistentVolumeClaim:
+            claimName: db-pvc
+---
+
+# DB-clusterIP
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: mongo-db
+spec:
+  selector:
+      app: db
+  ports:
+    - port: 27017
+      targetPort: 27017 
+
+---
+# DB-secret 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+  namespace: mongo-db
+data:
+  MONGO_INITDB_ROOT_PASSWORD: "YWRtaW4xMjM="
+  MONGO_INITDB_ROOT_USERNAME: "YWRtaW4="
+
+type: Opaque
+
+---
+# DB-pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: mongo-db
+  name: db-pv
+  labels:
+    type: db
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath: # Only for local/minikube/single-node clusters
+    path: /data/db
+
+---
+# DB-pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: mongo-db
+  name: db-pvc
+spec:
+  selector:
+    matchLabels:
+      type: db
+
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
+---
+# Network-policy
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-network-policy
+  namespace: mongo-db
+spec:
+  podSelector:
+    matchLabels:
+      app: db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          namespace: mongo-express
+    - podSelector:
+        matchLabels:
+          app: exp
+    ports:
+    - protocol: TCP
+      port: 27017
+
+
+
