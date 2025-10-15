@@ -21,8 +21,11 @@ This project implements a three-tier application across separate Kubernetes name
 
 ## Project Structure
 ├── db.yml # MongoDB deployment with PV, PVC, Secrets, NetworkPolicy
+
 ├── exp.yml # Mongo-Express deployment with ConfigMap
+
 ├── fe.yml # Front-end NGINX deployment
+
 └── README.md
 
 
